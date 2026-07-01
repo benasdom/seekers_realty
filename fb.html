@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seekers Realty - Facebook Feed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .page-header {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .page-header h1 {
+            font-size: 22px;
+            color: #1a1a1a;
+        }
+        .page-header .subtitle {
+            color: #65676b;
+            font-size: 14px;
+        }
+        .post {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .post-header {
+            padding: 16px 20px 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #e4e6eb;
+        }
+        .post-header .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1877f2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .post-header .name {
+            font-weight: 600;
+            color: #050505;
+        }
+        .post-header .time {
+            font-size: 13px;
+            color: #65676b;
+        }
+        .post-body {
+            padding: 16px 20px 12px 20px;
+            line-height: 1.6;
+            color: #1c1c1c;
+            word-wrap: break-word;
+        }
+        .post-body img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: block;
+        }
+        .post-body iframe {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        .post-body .hashtag {
+            color: #1877f2;
+            text-decoration: none;
+        }
+        .post-body .hashtag:hover {
+            text-decoration: underline;
+        }
+        .post-footer {
+            padding: 10px 20px 16px 20px;
+            border-top: 1px solid #e4e6eb;
+            font-size: 14px;
+            color: #65676b;
+        }
+        .post-footer a {
+            color: #1877f2;
+            text-decoration: none;
+        }
+        .post-footer a:hover {
+            text-decoration: underline;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px 20px;
+            color: #65676b;
+        }
+        .error {
+            background: #fdeded;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .page-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .post-body {
+                padding: 12px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="page-header">
+        <div style="flex:1;">
+            <h1>🏡 Seekers Realty</h1>
+            <div class="subtitle">Luxury Real Estate Experts in Ghana</div>
+        </div>
+        <a href="https://www.facebook.com/Propertiessekyi" target="_blank" style="background:#1877f2;color:white;padding:8px 16px;border-radius:6px;text-decoration:none;font-weight:500;font-size:14px;">Follow on Facebook →</a>
+    </div>
+
+    <!-- Feed Container -->
+    <div id="feed-container">
+        <div class="loading">⏳ Loading latest property listings...</div>
+    </div>
+</div>
+
+<script>
+// Your FetchRSS feed URL
+const FEED_URL = 'https://fetchrss.com/feed/1weYhO01EGrj1weYfm31U4mY.rss';
+
+async function fetchFeed() {
+    try {
+        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(FEED_URL)}`);
+        const data = await response.json();
+
+        if (data.status !== 'ok') throw new Error('Failed to load feed');
+
+        const container = document.getElementById('feed-container');
+        container.innerHTML = '';
+
+        data.items.forEach(item => {
+            // Clean up the content
+            let content = item.content;
+            // Remove the "Feed generated with FetchRSS" footer
+            content = content.replace(/<span[^>]*>.*Feed generated.*<\/span>/, '');
+            // Convert hashtags to clickable links
+            content = content.replace(/#(\w+)/g, '<a href="https://www.facebook.com/hashtag/$1" target="_blank" class="hashtag">#$1</a>');
+
+            const postDiv = document.createElement('div');
+            postDiv.className = 'post';
+            postDiv.innerHTML = `
+                <div class="post-header">
+                    <div class="avatar">S</div>
+                    <div>
+                        <div class="name">Seekers Realty</div>
+                        <div class="time">${new Date(item.pubDate).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}</div>
+                    </div>
+                </div>
+                <div class="post-body">${content}</div>
+                <div class="post-footer">
+                    <a href="${item.link}" target="_blank">🔗 View on Facebook</a>
+                </div>
+            `;
+            container.appendChild(postDiv);
+        });
+
+    } catch (error) {
+        document.getElementById('feed-container').innerHTML = `
+            <div class="error">
+                ❌ Unable to load Facebook feed at the moment.<br>
+                <small>Please try again later or <a href="${FEED_URL}" target="_blank">view the feed directly</a>.</small>
+            </div>
+        `;
+        console.error('Feed Error:', error);
+    }
+}
+
+// Load the feed when page loads
+fetchFeed();
+</script>
+
+</body>
+</html>
